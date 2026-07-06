@@ -1,0 +1,11 @@
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+
+# Generated timesheet outputs
+timesheet.csv
+timesheet.md
+/tmp/
