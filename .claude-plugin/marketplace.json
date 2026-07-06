@@ -20,7 +20,7 @@
       "name": "git-timesheet",
       "source": "./plugins/git-timesheet",
       "description": "Generate ERP-ready timesheet entries from git commit history using git-report. Supports date ranges, author filters, and multi-repo workflows.",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "author": {
         "name": "Djoufson CHE BENE"
       },
