@@ -1,0 +1,30 @@
+{
+  "name": "djoufson-skills",
+  "description": "Djoufson's personal Claude Code skill collection",
+  "owner": {
+    "name": "Djoufson CHE BENE",
+    "email": "djouflegran@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "pr-review",
+      "source": "./plugins/pr-review",
+      "description": "Comprehensive PR code review with inline GitHub comments — covers code quality, security, performance, architecture, and testing",
+      "version": "1.0.0",
+      "author": {
+        "name": "Djoufson CHE BENE"
+      },
+      "category": "development"
+    },
+    {
+      "name": "git-timesheet",
+      "source": "./plugins/git-timesheet",
+      "description": "Generate ERP-ready timesheet entries from git commit history using git-report. Supports date ranges, author filters, and multi-repo workflows.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Djoufson CHE BENE"
+      },
+      "category": "productivity"
+    }
+  ]
+}
