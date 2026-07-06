@@ -5,11 +5,12 @@
 1. Create the plugin directory and metadata:
 
 ```bash
+mkdir -p plugins/<name>/.claude-plugin
 mkdir -p plugins/<name>/skills/<name>
 ```
 
 ```json
-// plugins/<name>/plugin.json
+// plugins/<name>/.claude-plugin/plugin.json
 {
   "name": "<name>",
   "version": "1.0.0",
@@ -54,7 +55,7 @@ Step-by-step instructions for Claude to execute...
 
 ## Skill authoring tips
 
-- The `description` frontmatter field is the trigger surface — write it in natural language, as a user would phrase the request.
+- The `description` YAML header field is the trigger surface — write it in natural language, as a user would phrase the request.
 - Skills must be self-contained: include every command, flag, and decision rule so Claude can execute without external context.
 - Structure as numbered steps with clear inputs and outputs.
 - Use `{{arg}}` syntax for argument interpolation in the skill body.
