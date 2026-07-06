@@ -36,7 +36,64 @@ Parse the user's message to extract:
 
 **Branch inference:** if the user does not mention a branch, do **not** pass `-b` at all — let `git-report` include all branches. Only add `-b` when the user explicitly names one or more branches.
 
-## Step 2 — Run git-report
+## Step 2 — Ensure git-report is installed
+
+Before running anything, check whether `git-report` is available:
+
+```bash
+command -v git-report
+```
+
+If found, skip to Step 3. If not found, install it automatically:
+
+### 2a — Detect platform
+
+```bash
+OS=$(uname -s | tr '[:upper:]' '[:lower:]')   # darwin | linux
+ARCH=$(uname -m)                               # x86_64 | arm64 | aarch64
+```
+
+Map to asset name:
+- `OS=darwin, ARCH=arm64`  → `git-report-<version>-darwin-arm64`
+- `OS=darwin, ARCH=x86_64` → `git-report-<version>-darwin-amd64`
+- `OS=linux,  ARCH=aarch64 or arm64` → `git-report-<version>-linux-arm64`
+- `OS=linux,  ARCH=x86_64` → `git-report-<version>-linux-amd64`
+- Windows (PowerShell, `$env:OS` contains `Windows`) → `git-report-<version>-windows-amd64.exe`
+
+If the combination is not in this list, tell the user their platform is unsupported and stop.
+
+### 2b — Fetch the latest version tag
+
+```bash
+VERSION=$(gh release view --repo djoufson/git-report --json tagName --jq '.tagName' | sed 's/^v//')
+```
+
+If `gh` is not available, hard-code `VERSION=1.0.0` and note this may not be the latest.
+
+### 2c — Download and install
+
+```bash
+ASSET="git-report-${VERSION}-${OS}-${ARCH_MAPPED}"   # ARCH_MAPPED from the table above
+URL="https://github.com/djoufson/git-report/releases/download/v${VERSION}/${ASSET}"
+TMP=$(mktemp)
+curl -fsSL "$URL" -o "$TMP"
+chmod +x "$TMP"
+```
+
+Install to the first writable location in this order:
+1. `/usr/local/bin/git-report` — try `mv "$TMP" /usr/local/bin/git-report` directly (no sudo); works on most developer machines.
+2. If that fails (permission denied), install to `~/.local/bin/git-report` instead:
+   ```bash
+   mkdir -p ~/.local/bin
+   mv "$TMP" ~/.local/bin/git-report
+   ```
+   Then warn the user: "`~/.local/bin` was used — make sure it is in your `$PATH` before running this skill again."
+
+On Windows, download the `.exe` to `$env:LOCALAPPDATA\Programs\git-report\git-report.exe` and tell the user to add that directory to their `PATH` if it isn't already.
+
+After installing, verify with `git-report --version`. If verification fails, show the error and stop.
+
+## Step 3 — Run git-report
 
 Determine the output path for the CSV (prefer `/tmp/git-report-<project>.csv` to avoid cluttering the user's repo):
 
@@ -52,10 +109,9 @@ git-report \
 
 - If the user mentions multiple repos, run `git-report` once per repo and collect all CSVs.
 - Derive the project name from the repo directory name (e.g., `/home/user/myapp` → `myapp`).
-- If `git-report` is not found in PATH, stop and tell the user to install it before continuing.
 - If `git-report` exits with an error, show the error and stop.
 
-## Step 3 — Read and parse the CSV
+## Step 4 — Read and parse the CSV
 
 Each CSV has a header row and one row per commit. The columns are at least:
 
@@ -67,7 +123,7 @@ Branch,Commit Hash,Short Hash,Author,Email,Date,Message,Files Changed,Lines Adde
 - The `Message` field may contain commas — it is always quoted when so; respect CSV quoting.
 - If the file is empty (header only), report no activity for that project and skip synthesis.
 
-## Step 4 — Synthesize timesheet entries
+## Step 5 — Synthesize timesheet entries
 
 ### Grouping rules
 
@@ -81,7 +137,7 @@ Branch,Commit Hash,Short Hash,Author,Email,Date,Message,Files Changed,Lines Adde
 - Multiple projects: alphabetical unless the user specified an order.
 - Within a project: chronological (oldest day first); within a day: branches alphabetical.
 
-## Step 5 — Write output
+## Step 6 — Write output
 
 Always produce **two files**. Write them to the directory the user is working from (or a path the user specified):
 
@@ -97,7 +153,7 @@ Always produce **two files**. Write them to the directory the user is working fr
    - At the top, print the `git-report` parameters used (period, author, repo) so the user knows exactly what was included.
    - Note any repos/periods with no commits.
 
-## Step 6 — End summary
+## Step 7 — End summary
 
 End with:
 - The `git-report` command(s) that were run.
